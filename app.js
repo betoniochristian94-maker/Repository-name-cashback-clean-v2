@@ -1,4 +1,4 @@
-window.withdrawCashback = async function () {
+window.addCashback = async function () {
   if (!auth.currentUser) {
     alert("Please login first");
     return;
@@ -9,20 +9,25 @@ window.withdrawCashback = async function () {
   const docSnap = await getDoc(docRef);
 
   const data = docSnap.data();
-  let current = data.cashback || 0;
+  const today = new Date().toISOString().split("T")[0];
 
-  if (current <= 0) {
-    alert("No cashback to withdraw! 💸");
+  // ❌ Already added today
+  if (data.lastAdded === today) {
+    alert("You already claimed today's cashback 💸");
     return;
   }
 
-  // Simulate sending to GCash
-  alert(`Success! ₱${current} withdrawn to your GCash account 🎉`);
+  // ✅ Add cashback
+  let current = data.cashback || 0;
+  current += 10;
 
-  // Reset cashback
-  await setDoc(docRef, { cashback: 0 }, { merge: true });
-  localStorage.setItem("cashback", 0);
+  await setDoc(docRef, {
+    cashback: current,
+    lastAdded: today
+  }, { merge: true });
 
-  document.getElementById("cashback").innerText = 0;
-  document.getElementById("withdrawMessage").innerText = "";
+  localStorage.setItem("cashback", current);
+  document.getElementById("cashback").innerText = current;
+
+  alert("₱10 cashback added 🎉");
 };
