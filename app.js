@@ -19,7 +19,7 @@ const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
 // ============================
-// Helper functions
+// Helpers
 // ============================
 function isLoggedIn() {
   return !!localStorage.getItem("userName");
@@ -30,6 +30,7 @@ function updateUI() {
   document.querySelector(".add").disabled = !logged;
   document.querySelector(".withdraw").disabled = !logged;
   document.querySelector(".convert").disabled = !logged;
+  document.getElementById("loginBtn").style.display = logged ? "none" : "block";
 }
 
 // ============================
@@ -41,10 +42,7 @@ window.login = async function () {
     const user = result.user;
 
     localStorage.setItem("userName", user.displayName);
-    localStorage.setItem(
-      "cashback",
-      localStorage.getItem("cashback") || 0
-    );
+    localStorage.setItem("cashback", localStorage.getItem("cashback") || 0);
 
     document.getElementById("user").innerText =
       "Welcome " + user.displayName;
@@ -62,11 +60,6 @@ window.login = async function () {
 // Add Cashback
 // ============================
 window.addCashback = function () {
-  if (!isLoggedIn()) {
-    alert("Please login first");
-    return;
-  }
-
   let current = parseInt(localStorage.getItem("cashback") || 0);
   current += 10;
   localStorage.setItem("cashback", current);
@@ -77,11 +70,6 @@ window.addCashback = function () {
 // Withdraw
 // ============================
 window.withdrawCashback = function () {
-  if (!isLoggedIn()) {
-    alert("Please login first");
-    return;
-  }
-
   let current = parseInt(localStorage.getItem("cashback") || 0);
 
   if (current <= 0) {
@@ -97,14 +85,9 @@ window.withdrawCashback = function () {
 };
 
 // ============================
-// Convert Link
+// Convert Link (demo)
 // ============================
 window.convertLink = function () {
-  if (!isLoggedIn()) {
-    alert("Please login first");
-    return;
-  }
-
   const input = document.getElementById("linkInput").value;
   if (!input) {
     alert("Please paste a link first");
@@ -117,7 +100,7 @@ window.convertLink = function () {
 };
 
 // ============================
-// ON LOAD (ONLY ONE)
+// On Load
 // ============================
 window.onload = function () {
   const name = localStorage.getItem("userName");
