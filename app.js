@@ -1,33 +1,75 @@
-window.addCashback = async function () {
-  if (!auth.currentUser) {
-    alert("Please login first");
-    return;
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCLJQckahuisNfW9qd-cqlYKiTHUtD8MHw",
+  authDomain: "cashback-clean.firebaseapp.com",
+  projectId: "cashback-clean",
+  appId: "1:957439708934:web:48f146e1ecc791a1a55887"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+window.login = async function () {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    localStorage.setItem("userName", user.displayName);
+    localStorage.setItem("cashback", localStorage.getItem("cashback") || 0);
+
+    document.getElementById("user").innerText = "Welcome " + user.displayName;
+    document.getElementById("cashback").innerText =
+      localStorage.getItem("cashback");
+
+  } catch (error) {
+    alert(error.message);
   }
+};
 
-  const uid = auth.currentUser.uid;
-  const docRef = doc(db, "users", uid);
-  const docSnap = await getDoc(docRef);
-
-  const data = docSnap.data();
-  const today = new Date().toISOString().split("T")[0];
-
-  // ❌ Already added today
-  if (data.lastAdded === today) {
-    alert("You already claimed today's cashback 💸");
-    return;
-  }
-
-  // ✅ Add cashback
-  let current = data.cashback || 0;
+window.addCashback = function () {
+  let current = parseInt(localStorage.getItem("cashback") || 0);
   current += 10;
-
-  await setDoc(docRef, {
-    cashback: current,
-    lastAdded: today
-  }, { merge: true });
-
   localStorage.setItem("cashback", current);
   document.getElementById("cashback").innerText = current;
+};
 
-  alert("₱10 cashback added 🎉");
+window.withdrawCashback = function () {
+  let current = parseInt(localStorage.getItem("cashback") || 0);
+
+  if (current <= 0) {
+    document.getElementById("withdrawMessage").innerText =
+      "No cashback to withdraw!";
+    return;
+  }
+
+  localStorage.setItem("cashback", 0);
+  document.getElementById("cashback").innerText = 0;
+  document.getElementById("withdrawMessage").innerText =
+    "You withdrew ₱" + current;
+};
+
+window.convertLink = function () {
+  const input = document.getElementById("linkInput").value;
+  if (!input) {
+    alert("Please paste a link first");
+    return;
+  }
+
+  const converted =
+    "https://s.shopee.ph/demo?ref=cashback";
+  document.getElementById("convertedLink").innerText =
+    "Converted Link: " + converted;
+};
+
+window.onload = function () {
+  const name = localStorage.getItem("userName");
+  const cashback = localStorage.getItem("cashback");
+
+  if (name) {
+    document.getElementById("user").innerText = "Welcome " + name;
+    document.getElementById("cashback").innerText = cashback;
+  }
 };
